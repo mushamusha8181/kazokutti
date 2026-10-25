@@ -10,19 +10,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import jp.mushamusha.mushinglass.MushinGlass
+import jp.mushamusha.mushinglass.MushinGlassTheme
 
 class MainActivity : ComponentActivity() {
     private val micPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -32,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val prefs = getSharedPreferences("kazokucchi", Context.MODE_PRIVATE)
         setContent {
-            MushinTheme {
+            MushinGlassTheme {
                 var onboardingDone by remember { mutableStateOf(prefs.getBoolean("onboarding_done", false)) }
                 if (onboardingDone) {
                     VoiceHome()
@@ -171,50 +165,4 @@ private fun GlassButton(label: String, onClick: () -> Unit) {
     ) {
         Text(label)
     }
-}
-
-@Composable
-private fun MushinTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val cfg = MushinGlass.config(context)
-    val fontId = remember { context.resources.getIdentifier("mushin", "font", context.packageName) }
-    val family = remember(fontId) { if (fontId != 0) FontFamily(Font(fontId)) else FontFamily.Default }
-    val alpha = (cfg.glassOpacity / 100f).coerceIn(0.35f, 0.95f)
-    val colors = lightColorScheme(
-        primary = Color(cfg.palette.primary),
-        onPrimary = Color(cfg.textColor),
-        primaryContainer = Color(cfg.band).copy(alpha = alpha),
-        onPrimaryContainer = Color(cfg.textColor),
-        background = Color(cfg.background),
-        onBackground = Color(cfg.textColor),
-        surface = Color(cfg.rowBackground).copy(alpha = alpha),
-        onSurface = Color(cfg.textColor),
-        surfaceVariant = Color(cfg.listBackground).copy(alpha = alpha),
-        onSurfaceVariant = Color(cfg.auxiliary),
-        outline = Color(cfg.middle).copy(alpha = 0.55f)
-    )
-    MaterialTheme(
-        colorScheme = colors,
-        typography = mushinTypography(family),
-        shapes = Shapes(
-            extraSmall = RoundedCornerShape(8.dp),
-            small = RoundedCornerShape(10.dp),
-            medium = RoundedCornerShape(14.dp),
-            large = RoundedCornerShape(18.dp),
-            extraLarge = RoundedCornerShape(24.dp)
-        ),
-        content = content
-    )
-}
-
-private fun TextStyle.mushin(family: FontFamily) = copy(fontFamily = family)
-private fun mushinTypography(family: FontFamily): Typography {
-    val t = Typography()
-    return Typography(
-        displayLarge = t.displayLarge.mushin(family), displayMedium = t.displayMedium.mushin(family), displaySmall = t.displaySmall.mushin(family),
-        headlineLarge = t.headlineLarge.mushin(family), headlineMedium = t.headlineMedium.mushin(family), headlineSmall = t.headlineSmall.mushin(family),
-        titleLarge = t.titleLarge.mushin(family), titleMedium = t.titleMedium.mushin(family), titleSmall = t.titleSmall.mushin(family),
-        bodyLarge = t.bodyLarge.mushin(family), bodyMedium = t.bodyMedium.mushin(family), bodySmall = t.bodySmall.mushin(family),
-        labelLarge = t.labelLarge.mushin(family), labelMedium = t.labelMedium.mushin(family), labelSmall = t.labelSmall.mushin(family)
-    )
 }
