@@ -1,0 +1,41 @@
+name: One-off shared MUSHIN Compose theme migration
+
+on:
+  push:
+    paths:
+      - 'MUSHIN_THEME_TRIGGER'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace duplicated Compose theme
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main/java/jp/mushamusha/kazokucchi/MainActivity.kt')
+          s=p.read_text()
+          s=s.replace('import androidx.compose.foundation.shape.RoundedCornerShape\n','')
+          s=s.replace('import androidx.compose.ui.graphics.Color\n','')
+          s=s.replace('import androidx.compose.ui.platform.LocalContext\n','')
+          s=s.replace('import androidx.compose.ui.text.TextStyle\n','')
+          s=s.replace('import androidx.compose.ui.text.font.Font\n','')
+          s=s.replace('import androidx.compose.ui.text.font.FontFamily\n','')
+          s=s.replace('import jp.mushamusha.mushinglass.MushinGlass\n','import jp.mushamusha.mushinglass.MushinGlassTheme\n')
+          s=s.replace('            MushinTheme {','            MushinGlassTheme {',1)
+          marker='\n@Composable\nprivate fun MushinTheme(content: @Composable () -> Unit) {'
+          idx=s.find(marker)
+          if idx<0: raise SystemExit('duplicated theme block missing')
+          s=s[:idx].rstrip()+"\n"
+          p.write_text(s)
+          PY
+          rm -f MUSHIN_THEME_TRIGGER .github/workflows/oneoff-unify-mushin-theme.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Use shared MUSHIN Compose theme'
+          git push
